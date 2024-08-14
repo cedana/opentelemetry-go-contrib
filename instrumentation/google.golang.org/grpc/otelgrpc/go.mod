@@ -1,9 +1,10 @@
-module cedana/contrib/instrumentation/google.golang.org/grpc/otelgrpc
+module github.com/cedana/cedana/otelgrpc
 
 go 1.21
 
 require (
 	github.com/stretchr/testify v1.9.0
+	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.53.0
 	go.opentelemetry.io/otel v1.28.0
 	go.opentelemetry.io/otel/metric v1.28.0
 	go.opentelemetry.io/otel/trace v1.28.0
