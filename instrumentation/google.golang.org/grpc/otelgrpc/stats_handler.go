@@ -155,12 +155,14 @@ func (c *config) handleRPC(ctx context.Context, rs stats.RPCStats, isServer bool
 		}
 
 		if c.ReceivedEvent {
+			reqData := string(rs.Data)
 			span.AddEvent("message",
 				trace.WithAttributes(
 					semconv.MessageTypeReceived,
 					semconv.MessageIDKey.Int64(messageId),
 					semconv.MessageCompressedSizeKey.Int(rs.CompressedLength),
 					semconv.MessageUncompressedSizeKey.Int(rs.Length),
+					attribute.String("request", reqData),
 				),
 			)
 		}
@@ -171,12 +173,14 @@ func (c *config) handleRPC(ctx context.Context, rs stats.RPCStats, isServer bool
 		}
 
 		if c.SentEvent {
+			respData := string(rs.Data)
 			span.AddEvent("message",
 				trace.WithAttributes(
 					semconv.MessageTypeSent,
 					semconv.MessageIDKey.Int64(messageId),
 					semconv.MessageCompressedSizeKey.Int(rs.CompressedLength),
 					semconv.MessageUncompressedSizeKey.Int(rs.Length),
+					attribute.String("response", respData),
 				),
 			)
 		}
