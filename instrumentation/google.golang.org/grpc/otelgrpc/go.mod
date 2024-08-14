@@ -1,4 +1,4 @@
-module github.com/cedana/cedana/otelgrpc
+module github.com/cedana/otelgrpc
 
 go 1.21
 
