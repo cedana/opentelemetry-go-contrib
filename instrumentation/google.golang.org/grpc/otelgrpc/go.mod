@@ -1,4 +1,4 @@
-module github.com/cedana/otelgrpc
+module github.com/cedana/opentelemetry-go-contrib/instrumentation/google.golang.org/grpc/otelgrpc
 
 go 1.21
 
