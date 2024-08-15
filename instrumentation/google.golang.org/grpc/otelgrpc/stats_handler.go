@@ -172,18 +172,16 @@ func (c *config) handleRPC(ctx context.Context, rs stats.RPCStats, isServer bool
 			c.rpcResponseSize.Record(ctx, int64(rs.Length), metric.WithAttributeSet(attribute.NewSet(metricAttrs...)))
 		}
 
-		if c.SentEvent {
-			respData := string(rs.Data)
-			span.AddEvent("message",
-				trace.WithAttributes(
-					semconv.MessageTypeSent,
-					semconv.MessageIDKey.Int64(messageId),
-					semconv.MessageCompressedSizeKey.Int(rs.CompressedLength),
-					semconv.MessageUncompressedSizeKey.Int(rs.Length),
-					attribute.String("response", respData),
-				),
-			)
-		}
+		respData := string(rs.Data)
+		span.AddEvent("message",
+			trace.WithAttributes(
+				semconv.MessageTypeSent,
+				semconv.MessageIDKey.Int64(messageId),
+				semconv.MessageCompressedSizeKey.Int(rs.CompressedLength),
+				semconv.MessageUncompressedSizeKey.Int(rs.Length),
+				attribute.String("response", respData),
+			),
+		)
 	case *stats.OutTrailer:
 	case *stats.OutHeader:
 		if p, ok := peer.FromContext(ctx); ok {
