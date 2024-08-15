@@ -5,6 +5,7 @@ package otelgrpc // import "go.opentelemetry.io/contrib/instrumentation/google.g
 
 import (
 	"context"
+	"strings"
 	"sync/atomic"
 	"time"
 
@@ -154,25 +155,23 @@ func (c *config) handleRPC(ctx context.Context, rs stats.RPCStats, isServer bool
 			c.rpcRequestSize.Record(ctx, int64(rs.Length), metric.WithAttributeSet(attribute.NewSet(metricAttrs...)))
 		}
 
-		if c.ReceivedEvent {
-			reqData := string(rs.Data)
-			span.AddEvent("message",
-				trace.WithAttributes(
-					semconv.MessageTypeReceived,
-					semconv.MessageIDKey.Int64(messageId),
-					semconv.MessageCompressedSizeKey.Int(rs.CompressedLength),
-					semconv.MessageUncompressedSizeKey.Int(rs.Length),
-					attribute.String("request", reqData),
-				),
-			)
-		}
+		reqData := strings.ToValidUTF8(string(rs.Data), "")
+		span.AddEvent("message",
+			trace.WithAttributes(
+				semconv.MessageTypeReceived,
+				semconv.MessageIDKey.Int64(messageId),
+				semconv.MessageCompressedSizeKey.Int(rs.CompressedLength),
+				semconv.MessageUncompressedSizeKey.Int(rs.Length),
+				attribute.String("request", reqData),
+			),
+		)
 	case *stats.OutPayload:
 		if gctx != nil {
 			messageId = atomic.AddInt64(&gctx.messagesSent, 1)
 			c.rpcResponseSize.Record(ctx, int64(rs.Length), metric.WithAttributeSet(attribute.NewSet(metricAttrs...)))
 		}
 
-		respData := string(rs.Data)
+		respData := strings.ToValidUTF8(string(rs.Data), "")
 		span.AddEvent("message",
 			trace.WithAttributes(
 				semconv.MessageTypeSent,
