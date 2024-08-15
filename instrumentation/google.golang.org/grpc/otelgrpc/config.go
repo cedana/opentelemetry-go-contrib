@@ -67,6 +67,8 @@ func newConfig(opts []Option, role string) *config {
 		Propagators:    otel.GetTextMapPropagator(),
 		TracerProvider: otel.GetTracerProvider(),
 		MeterProvider:  otel.GetMeterProvider(),
+		ReceivedEvent:  true,
+		SentEvent:      true,
 	}
 	for _, o := range opts {
 		o.apply(c)
