@@ -37,7 +37,6 @@ type serverHandler struct {
 	*config
 }
 
-// NewServerHandler creates a stats.Handler for a gRPC server.
 func NewServerHandler(opts ...Option) stats.Handler {
 	h := &serverHandler{
 		config: newConfig(opts, "server"),
