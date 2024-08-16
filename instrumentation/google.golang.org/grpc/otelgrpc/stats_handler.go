@@ -21,6 +21,8 @@ import (
 	"go.opentelemetry.io/otel/metric"
 	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
 	"go.opentelemetry.io/otel/trace"
+	"google.golang.org/protobuf/encoding/protojson"
+	"google.golang.org/protobuf/proto"
 )
 
 type gRPCContextKey struct{}
@@ -155,16 +157,14 @@ func (c *config) handleRPC(ctx context.Context, rs stats.RPCStats, isServer bool
 			messageId = atomic.AddInt64(&gctx.messagesReceived, 1)
 			c.rpcRequestSize.Record(ctx, int64(rs.Length), metric.WithAttributeSet(attribute.NewSet(metricAttrs...)))
 		}
-
-		reqData := strings.ToValidUTF8(string(rs.Data), "")
-		fmt.Println("reqData", reqData)
+		reqJSON := payloadToJSON(rs.Payload)
 		span.AddEvent("message",
 			trace.WithAttributes(
 				semconv.MessageTypeReceived,
 				semconv.MessageIDKey.Int64(messageId),
 				semconv.MessageCompressedSizeKey.Int(rs.CompressedLength),
 				semconv.MessageUncompressedSizeKey.Int(rs.Length),
-				attribute.String("request", reqData),
+				attribute.String("request", reqJSON),
 			),
 		)
 	case *stats.OutPayload:
@@ -173,15 +173,14 @@ func (c *config) handleRPC(ctx context.Context, rs stats.RPCStats, isServer bool
 			c.rpcResponseSize.Record(ctx, int64(rs.Length), metric.WithAttributeSet(attribute.NewSet(metricAttrs...)))
 		}
 
-		respData := strings.ToValidUTF8(string(rs.Data), "")
-		fmt.Println("respData", respData)
+		respJSON := payloadToJSON(rs.Payload)
 		span.AddEvent("message",
 			trace.WithAttributes(
 				semconv.MessageTypeSent,
 				semconv.MessageIDKey.Int64(messageId),
 				semconv.MessageCompressedSizeKey.Int(rs.CompressedLength),
 				semconv.MessageUncompressedSizeKey.Int(rs.Length),
-				attribute.String("response", respData),
+				attribute.String("response", respJSON),
 			),
 		)
 	case *stats.OutTrailer:
@@ -223,4 +222,29 @@ func (c *config) handleRPC(ctx context.Context, rs stats.RPCStats, isServer bool
 	default:
 		return
 	}
+}
+
+func payloadToJSON(payload any) string {
+	if payload == nil {
+		return "null"
+	}
+
+	// Check if the payload implements the proto.Message interface
+	protoMsg, ok := payload.(proto.Message)
+	if !ok {
+		// If it's not a protobuf message, return a default representation
+		return fmt.Sprintf("%+v", payload)
+	}
+
+	// Use protojson to marshal the protobuf message
+	marshaler := protojson.MarshalOptions{
+		EmitUnpopulated: true,
+		Indent:          "  ",
+	}
+	jsonData, err := marshaler.Marshal(protoMsg)
+	if err != nil {
+		return fmt.Sprintf("Error marshaling to JSON: %v", err)
+	}
+
+	return string(jsonData)
 }

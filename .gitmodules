@@ -1,0 +1,4 @@
+[submodule "instrumentation/google.golang.org/grpc/otelgrpc/cedana-api"]
+	path = instrumentation/google.golang.org/grpc/otelgrpc/cedana-api
+	url = https://github.com/cedana/cedana-api
+	branch = main
