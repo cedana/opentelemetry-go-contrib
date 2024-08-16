@@ -5,6 +5,7 @@ package otelgrpc // import "go.opentelemetry.io/contrib/instrumentation/google.g
 
 import (
 	"context"
+	"fmt"
 	"strings"
 	"sync/atomic"
 	"time"
@@ -156,6 +157,7 @@ func (c *config) handleRPC(ctx context.Context, rs stats.RPCStats, isServer bool
 		}
 
 		reqData := strings.ToValidUTF8(string(rs.Data), "")
+		fmt.Println("reqData", reqData)
 		span.AddEvent("message",
 			trace.WithAttributes(
 				semconv.MessageTypeReceived,
@@ -172,6 +174,7 @@ func (c *config) handleRPC(ctx context.Context, rs stats.RPCStats, isServer bool
 		}
 
 		respData := strings.ToValidUTF8(string(rs.Data), "")
+		fmt.Println("respData", respData)
 		span.AddEvent("message",
 			trace.WithAttributes(
 				semconv.MessageTypeSent,
