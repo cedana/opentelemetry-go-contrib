@@ -229,14 +229,11 @@ func payloadToJSON(payload any) string {
 		return "null"
 	}
 
-	// Check if the payload implements the proto.Message interface
 	protoMsg, ok := payload.(proto.Message)
 	if !ok {
-		// If it's not a protobuf message, return a default representation
 		return fmt.Sprintf("%+v", payload)
 	}
 
-	// Use protojson to marshal the protobuf message
 	marshaler := protojson.MarshalOptions{
 		EmitUnpopulated: true,
 		Indent:          "  ",
