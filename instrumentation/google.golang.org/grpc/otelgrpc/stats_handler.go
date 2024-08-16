@@ -6,7 +6,6 @@ package otelgrpc // import "go.opentelemetry.io/contrib/instrumentation/google.g
 import (
 	"context"
 	"fmt"
-	"strings"
 	"sync/atomic"
 	"time"
 
